@@ -1,4 +1,3 @@
-// Utility.cpp
 #define LOG(argument) std::cout << argument << '\n'
 #define STB_IMAGE_IMPLEMENTATION
 #define NUMBER_OF_TEXTURES 1 // to be generated, that is

@@ -22,7 +22,6 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Entity.h"
-#include "Map.h"
 
 Entity::Entity()
 {
@@ -113,7 +112,7 @@ void Entity::draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint textu
 }
 
 
-void Entity::update(float delta_time, Entity* player, Entity* objects, int object_count, Map* map)
+void Entity::update(float delta_time, Entity* player, Entity* objects, int object_count, Map* map, int& g_lives)
 {
     if (!m_is_active) return;
 
@@ -144,7 +143,6 @@ void Entity::update(float delta_time, Entity* player, Entity* objects, int objec
         }
     }
 
-
     m_velocity.x = m_movement.x * m_speed;
     m_velocity += m_acceleration * delta_time;
 
@@ -157,6 +155,20 @@ void Entity::update(float delta_time, Entity* player, Entity* objects, int objec
     m_position.x += m_velocity.x * delta_time;
     check_collision_x(objects, object_count);
     check_collision_x(map);
+
+    if (hit) {
+        g_lives--;
+        hit = false;
+    }
+
+    if (inv_cd) {
+        inv_timer += delta_time;
+    }
+
+    if (inv_timer > inv_sec) {
+        inv_cd = false;
+        inv_timer = 0;
+    }
 
     if (m_is_jumping)
     {
@@ -212,7 +224,7 @@ void Entity::ai_patrol(Entity* player, float delta_time)
             current_step += delta_time;
         }
         if (player->m_type == PLAYER) {
-            if (glm::distance(m_position, player->m_position) < 1.5f) {m_aistate = HUNGO; }
+            if (glm::distance(m_position, player->m_position) < 1.5f) { m_aistate = HUNGO; }
         }
         break;
 
@@ -248,30 +260,30 @@ void Entity::ai_jump(Entity* player, float delta_time)
 
 void Entity::ai_boss(Entity* player, float delta_time)
 {
-        switch (m_aistate) {
-            if (current_time > cooldown) {
-                cd = false;
-            }
-        case BOSSFIGHT:
-                if (glm::distance(m_position, player->get_position()) < 3.0f && !cd)
-                {
-                    m_aistate = OHO;
-                }
-            break;
+    if (current_time > cooldown) {
+        cd = false;
+    }
+    if (cd) {
+        current_time += delta_time;
+    }
+    switch (m_aistate) {
+    case BOSSFIGHT:
+        if (glm::distance(m_position, player->get_position()) < 3.0f && !cd)
+        {
+            m_aistate = OHO;
+        }
+        break;
 
-        case OHO:
-            if (!cd) {
-                m_position.x = player->m_position.x;
-                m_position.y = player->m_position.y + 4.0f;
-                current_time = 0;
-                cd = true;
-                m_aistate = BOSSFIGHT;
-            }
-            break;
+    case OHO:
+        if (!cd) {
+            m_position.x = player->m_position.x;
+            m_position.y = player->m_position.y + 4.0f;
+            current_time = 0;
+            cd = true;
+            m_aistate = BOSSFIGHT;
         }
-        if (cd) {
-            current_time += delta_time;
-        }
+        break;
+    }
 }
 
 void const Entity::check_collision_y(Entity* collidable_entities, int collidable_entity_count)
@@ -290,9 +302,6 @@ void const Entity::check_collision_y(Entity* collidable_entities, int collidable
 
                 // Collision!
                 m_collided_top = true;
-                if (m_type == PLAYER && collidable_entity->m_type == ENEMY) {
-                    lose = true;
-                }
             }
             else if (m_velocity.y < 0) {
                 m_position.y += y_overlap;
@@ -303,7 +312,13 @@ void const Entity::check_collision_y(Entity* collidable_entities, int collidable
                 m_collided_bottom = true;
                 if (m_type == PLAYER && collidable_entity->m_type == ENEMY) {
                     collidable_entity->m_is_active = false;
-                    enemies_killed++;
+                    m_velocity.y += m_jumping_power;
+                }
+                if (m_type == ENEMY && collidable_entity->m_type == PLAYER) {
+                    if (!inv_cd) {
+                        inv_cd = true;
+                        hit = true;
+                    }
                 }
             }
         }
@@ -313,36 +328,42 @@ void const Entity::check_collision_y(Entity* collidable_entities, int collidable
 void const Entity::check_collision_x(Entity* collidable_entities, int collidable_entity_count)
 {
     if (!m_is_active) return;
-        for (int i = 0; i < collidable_entity_count; i++)
+    for (int i = 0; i < collidable_entity_count; i++)
+    {
+        Entity* collidable_entity = &collidable_entities[i];
+
+        if (check_collision(collidable_entity))
         {
-            Entity* collidable_entity = &collidable_entities[i];
+            float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
+            float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
+            if (m_velocity.x > 0) {
+                m_position.x -= x_overlap;
+                m_velocity.x = 0;
 
-            if (check_collision(collidable_entity))
-            {
-                float x_distance = fabs(m_position.x - collidable_entity->m_position.x);
-                float x_overlap = fabs(x_distance - (m_width / 2.0f) - (collidable_entity->m_width / 2.0f));
-                if (m_velocity.x > 0) {
-                    m_position.x -= x_overlap;
-                    m_velocity.x = 0;
-
-                    // Collision!
-                    m_collided_right = true;
-                    if (m_type == PLAYER && collidable_entity->m_type == ENEMY) {
-                        lose = true;
+                // Collision!
+                m_collided_right = true;
+                if (m_type == ENEMY && collidable_entity->m_type == PLAYER) {
+                    if (!inv_cd) {
+                        inv_cd = true;
+                        hit = true;
                     }
                 }
-                else if (m_velocity.x < 0) {
-                    m_position.x += x_overlap;
-                    m_velocity.x = 0;
+            }
+            else if (m_velocity.x < 0) {
+                m_position.x += x_overlap;
+                m_velocity.x = 0;
 
-                    // Collision!
-                    m_collided_left = true;
-                    if (m_type == PLAYER && collidable_entity->m_type == ENEMY) {
-                        lose = true;
+                // Collision!
+                m_collided_left = true;
+                if (m_type == ENEMY && collidable_entity->m_type == PLAYER) {
+                    if (!inv_cd) {
+                        inv_cd = true;
+                        hit = true;
                     }
                 }
             }
         }
+    }
 }
 
 void const Entity::check_collision_y(Map* map)

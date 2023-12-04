@@ -30,7 +30,7 @@ struct GameState
     Entity* enemies;
 
     Mix_Music* bgm;
-    Mix_Chunk* jump_sfx;
+    Mix_Chunk* dead_sfx;
 
     int next_scene_id;
 };
@@ -38,11 +38,11 @@ struct GameState
 class Scene {
 public:
     int m_number_of_enemies = 1;
+    int lives;
 
     GameState m_state;
-
     virtual void initialise() = 0;
-    virtual void update(float delta_time) = 0;
+    virtual void update(float delta_time, int& g_lives) = 0;
     virtual void render(ShaderProgram* program) = 0;
 
     GameState const get_state()             const { return m_state; }

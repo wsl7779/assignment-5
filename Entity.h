@@ -7,7 +7,7 @@
 * NYU School of Engineering Policies and Procedures on
 * Academic Misconduct.
 **/
-
+#pragma once
 #include "Map.h"
 
 enum EntityType { PLAYER, ENEMY };
@@ -45,16 +45,22 @@ private:
     float current_step = 0.0f;
     bool is_left = true;
 
-    float jump_time = 5.0f;
+    float jump_time = 2.0f;
     float current_jump = 0.0f;
-    int enemies_killed = 0;
-    bool lose = false;
 
     float current_time = 0.0f;
     float cooldown = 2.0f;
     bool cd = false;
 
+    const float inv_sec = 1.0f;
+    float inv_timer = 0.0f;
+
 public:
+    bool m_is_jumping = false;
+    float m_jumping_power = 7.0f;
+
+    bool inv_cd = false;
+    bool hit = false;
 
     bool const check_collision(Entity* other) const;
     void const check_collision_x(Entity* collidable_entities, int collidable_entity_count);
@@ -68,6 +74,7 @@ public:
 
     // ————— ANIMATION ————— //
 
+
     int m_animation_frames = 0,
         m_animation_index = 0,
         m_animation_cols = 0,
@@ -75,9 +82,6 @@ public:
 
     int* m_animation_indices = NULL;
     float m_animation_time = 0.0f;
-
-    bool m_is_jumping = false;
-    float m_jumping_power = 0;
 
     bool m_collided_top = false;
     bool m_collided_bottom = false;
@@ -92,7 +96,7 @@ public:
     ~Entity();
 
     void draw_sprite_from_texture_atlas(ShaderProgram* program, GLuint texture_id, int index);
-    void update(float delta_time, Entity* player, Entity* objects, int object_count, Map* map);
+    void update(float delta_time, Entity* player, Entity* objects, int object_count, Map* map, int& g_lives);
     //void follow(float delta_time, Entity* parent);
     void render(ShaderProgram* program);
 
@@ -122,8 +126,7 @@ public:
     AIType     const get_ai_type()        const { return m_aitype; };
     AIState    const get_ai_state()       const { return m_aistate; };
     float      const get_speed()          const { return m_speed; };
-    int const get_killed() const { return enemies_killed; };
-    bool const get_lose() const { return lose; };
+    bool       const get_active()         const { return m_is_active; };
 
     // ————— SETTERS ————— //
     void const set_position(glm::vec3 new_position) { m_position = new_position; };

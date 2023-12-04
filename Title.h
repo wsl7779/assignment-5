@@ -1,12 +1,9 @@
-// LevelA.h
+// Title.h
 #include "Scene.h"
 
-class LevelUno : public Scene {
+class Title : public Scene {
 public:
-    const int ENEMY_COUNT = 1;
-
-    LevelUno(int g_lives);
-    ~LevelUno();
+    ~Title();
 
     void initialise() override;
     void update(float delta_time, int& g_lives) override;
