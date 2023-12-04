@@ -1,6 +1,13 @@
+/**
+* Author: Will Lee
+* Assignment: Platformer
+* Date due: 2023-12-02, 11:59pm
+* I pledge that I have completed this assignment without
+* collaborating with anyone else, in conformance with the
+* NYU School of Engineering Policies and Procedures on
+* Academic Misconduct.
+**/
 
-
-// LevelA.cpp
 #include "LevelTres.h"
 #include "Utility.h"
 
@@ -47,21 +54,15 @@ void LevelTres::initialise()
     m_state.player->m_texture_id = Utility::load_texture("assets/yuuka trans.png");
 
     // Walking
-    /*
-    m_state.player->m_walking[m_state.player->LEFT] = new int[4] { 1, 5, 9, 13 };
-    m_state.player->m_walking[m_state.player->RIGHT] = new int[4] { 3, 7, 11, 15 };
-    m_state.player->m_walking[m_state.player->UP] = new int[4] { 2, 6, 10, 14 };
-    m_state.player->m_walking[m_state.player->DOWN] = new int[4] { 0, 4, 8, 12 };
+    m_state.player->m_idle = new int[4] {0, 1, 2, 3};
 
-    m_state.player->m_animation_indices = m_state.player->m_walking[m_state.player->RIGHT];  // start George looking left
+    m_state.player->m_animation_indices = m_state.player->m_idle;
     m_state.player->m_animation_frames = 4;
     m_state.player->m_animation_index = 0;
     m_state.player->m_animation_time = 0.0f;
     m_state.player->m_animation_cols = 4;
-    m_state.player->m_animation_rows = 4;
-    m_state.player->set_height(0.8f);
-    m_state.player->set_width(0.8f);
-    */
+    m_state.player->m_animation_rows = 1;
+    m_state.player->set_wh(0.9f, 0.9f);
 
     // Jumping
     m_state.player->m_jumping_power = 5.0f;

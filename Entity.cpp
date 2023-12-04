@@ -1,7 +1,7 @@
 /**
 * Author: Will Lee
-* Assignment: Rise of the AI
-* Date due: 2023-11-18, 11:59pm
+* Assignment: Platformer
+* Date due: 2023-12-02, 11:59pm
 * I pledge that I have completed this assignment without
 * collaborating with anyone else, in conformance with the
 * NYU School of Engineering Policies and Procedures on
@@ -56,10 +56,7 @@ Entity::Entity(EntityType input_type)
 
 Entity::~Entity()
 {
-    delete[] m_animation_up;
-    delete[] m_animation_down;
-    delete[] m_animation_left;
-    delete[] m_animation_right;
+    delete[] m_idle;
 }
 
 bool const Entity::check_collision(Entity* other) const
@@ -125,8 +122,6 @@ void Entity::update(float delta_time, Entity* player, Entity* objects, int objec
 
     if (m_animation_indices != NULL)
     {
-        if (glm::length(m_movement) != 0)
-        {
             m_animation_time += delta_time;
             float frames_per_second = (float)1 / SECONDS_PER_FRAME;
 
@@ -140,7 +135,6 @@ void Entity::update(float delta_time, Entity* player, Entity* objects, int objec
                     m_animation_index = 0;
                 }
             }
-        }
     }
 
     m_velocity.x = m_movement.x * m_speed;
@@ -172,8 +166,8 @@ void Entity::update(float delta_time, Entity* player, Entity* objects, int objec
 
     if (m_is_jumping)
     {
-        m_is_jumping = false;
 
+        m_is_jumping = false;
         m_velocity.y += m_jumping_power;
     }
 

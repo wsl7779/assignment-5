@@ -1,7 +1,7 @@
 ﻿/**
 * Author: Will Lee
-* Assignment: Rise of the AI
-* Date due: 2023-11-18, 11:59pm
+* Assignment: Platformer
+* Date due: 2023-12-02, 11:59pm
 * I pledge that I have completed this assignment without
 * collaborating with anyone else, in conformance with the
 * NYU School of Engineering Policies and Procedures on
@@ -154,7 +154,7 @@ void process_input()
     }
     else if (g_current_scene != g_win) {
         g_current_scene->m_state.player->set_movement(glm::vec3(0.0f));
-
+        
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
