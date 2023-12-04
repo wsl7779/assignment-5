@@ -51,7 +51,7 @@ void LevelTres::initialise()
     m_state.player->set_movement(glm::vec3(0.0f));
     m_state.player->set_speed(2.5f);
     m_state.player->set_acceleration(glm::vec3(0.0f, -9.81f, 0.0f));
-    m_state.player->m_texture_id = Utility::load_texture("assets/yuuka trans.png");
+    m_state.player->m_texture_id = Utility::load_texture("assets/idle.png");
 
     // Walking
     m_state.player->m_idle = new int[4] {0, 1, 2, 3};
